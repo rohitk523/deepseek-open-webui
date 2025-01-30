@@ -8,6 +8,8 @@ services:
       - ollama:/root/.ollama
     ports:
       - "11434:11434"
+    networks:
+      - app_network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
@@ -23,7 +25,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - OLLAMA_API_BASE_URL=http://ollama:11434/api
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+      - OLLAMA_API_HOST=ollama
+      - OLLAMA_HOST=ollama
+      - HOST=0.0.0.0
+      - PORT=8080
+      - WEBUI_HOST=http://localhost:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app_network
     restart: unless-stopped
     depends_on:
       ollama:
@@ -32,3 +43,7 @@ services:
 volumes:
   ollama:
   open-webui:
+
+networks:
+  app_network:
+    driver: bridge
